@@ -1,0 +1,17 @@
+.searchRoom{
+	display: flex;
+	background: white;
+	border-radius: 10px;
+	width: 60%;
+}
+
+
+.topIcons{
+	display: flex;
+	justify-content: space-between;
+}
+
+.servers{
+	background-color: white;
+	border-bottom: 4px solid black;
+}

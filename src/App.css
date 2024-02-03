@@ -1,0 +1,7 @@
+.sidebar{
+	flex:0.35;
+}
+.chatbox{
+	flex:0.65;
+	background: gray;
+}
