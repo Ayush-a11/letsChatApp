@@ -1,19 +1,40 @@
 import { EmojiEmotions, Mic, Search, Send, Settings } from '@mui/icons-material'
 import { Avatar, Menu } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import {useParams} from 'react-router-dom'
+import { doc, getDoc } from "firebase/firestore";
+import db from '../../firebase';
 
 function ChatBox() {
 	const [textmsg, setTextMsg] = useState();
+	const roomid =useParams('roomid');
 
-	const handleSubmit =() => {
+	const [roomInfo, setRoomInfo] = useState({});
+	const handleSubmit =(e) => {
+		e.preventDefault();
 
+
+		setTextMsg('')
 	}
+	useEffect(() => {
+		if (roomid){
+
+			const docRef = doc(db,'Rooms',roomid.roomid)
+			getDoc(docRef).then((doc) =>
+			setRoomInfo(doc.data())
+			).catch(err => 
+			// docSnap.data() will be undefined in this case
+			console.log("No such document!",err));
+			
+		}
+
+	},[roomid]);
   return (
 	<div className="flex h-full flex-col justify-between bg-white border-l-2 border-gray-300">
 		<div className="flex justify-between items-center bg-red-500 pl-4 ">
 			<Avatar/>
 			<div className="flex flex-col">
-			<h1 className="text-white font-mono font-bold text-xl">Room Name</h1>
+			<h1 className="text-white font-mono font-bold text-xl">{roomInfo.name}</h1>
 			<p className="text-gray-300">last message at..</p> 
 			</div>
 			<div>
