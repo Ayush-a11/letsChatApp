@@ -1,7 +1,9 @@
 .sidebar{
 	flex:0.35;
+	overflow: scroll;
+	
 }
 .chatbox{
 	flex:0.65;
-	background: gray;
+	background: white;
 }

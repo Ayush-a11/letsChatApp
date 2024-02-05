@@ -11,7 +11,7 @@ import store from './components/Redux/Store.js'
 const app=  createBrowserRouter(createRoutesFromElements(
   
     <Route path='/' element={<App/>}>
-      <Route path='Rooms/:roomid' element={<ChatBox/>}/>
+      <Route path='Rooms/:roomid/:colors' element={<ChatBox/>}/>
     </Route>
 ))
 

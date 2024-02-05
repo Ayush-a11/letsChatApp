@@ -1,25 +1,63 @@
-import { EmojiEmotions, Mic, Search, Send, Settings } from '@mui/icons-material'
+import { Collections, EmojiEmotions, Mic, Search, Send, Settings } from '@mui/icons-material'
 import { Avatar, Menu } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import {useParams} from 'react-router-dom'
-import { doc, getDoc } from "firebase/firestore";
+import { addDoc, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs,orderBy,query,Timestamp 	  } from "firebase/firestore";
+
 import db from '../../firebase';
+import { useSelector } from 'react-redux';
+import { useCallback } from 'react';
 
 function ChatBox() {
 	const [textmsg, setTextMsg] = useState();
-	const roomid =useParams('roomid');
-
+	const {roomid,colors} =useParams('roomid');
+	const [message,setMessages] =useState([]);
 	const [roomInfo, setRoomInfo] = useState({});
+	const selector =useSelector((state)=>state.user);
+
+	console.log('ChatBox ',roomid,colors);
+	const addMessages =useCallback(() => {
+		setMessages([])
+		if(roomid){
+        console.log('hi')
+		const q= query(collection(db,"Rooms",roomid,"Messages"),orderBy("timestamp","asc"));
+			getDocs(q).
+			then((doc) =>(
+				doc.forEach((doc) =>
+				setMessages((prev)=> [...prev,doc.data()])
+				)
+			)).catch((error)=>console.log('error', error))
+		console.log('data-in',message)
+		}
+	},[roomid])	
+
+	useEffect(() => {
+		setMessages([])
+		addMessages()
+	  },
+	  [roomid])
 	const handleSubmit =(e) => {
 		e.preventDefault();
-
+        
+		addDoc(collection(db,"Rooms",roomid,"Messages"),{
+			message: textmsg,
+			username: selector.displayName,
+			timestamp: Timestamp.fromDate(new Date())
+		}).then((id)=>console.log('doc ref id-> ',id)).
+		catch(error=> console.log('error',error));
 
 		setTextMsg('')
+		addMessages();
 	}
+	console.log('data',message)
+
+
+
 	useEffect(() => {
 		if (roomid){
 
-			const docRef = doc(db,'Rooms',roomid.roomid)
+			const docRef = doc(db,'Rooms',roomid)
 			getDoc(docRef).then((doc) =>
 			setRoomInfo(doc.data())
 			).catch(err => 
@@ -30,25 +68,32 @@ function ChatBox() {
 
 	},[roomid]);
   return (
-	<div className="flex h-full flex-col justify-between bg-white border-l-2 border-gray-300">
-		<div className="flex justify-between items-center bg-red-500 pl-4 ">
-			<Avatar/>
+<div
+  className="flex h-full flex-col justify-between border-l-2 border-gray-300">
+	<div className="flex justify-between items-center bg-red-500 pl-4 ">
+			<Avatar  sx={{bgcolor:colors, color:'black', border:'2px solid white'}} ><b>{roomInfo?.name?.substring(0,1)}</b></Avatar>
 			<div className="flex flex-col">
 			<h1 className="text-white font-mono font-bold text-xl">{roomInfo.name}</h1>
-			<p className="text-gray-300">last message at..</p> 
+			<p className="text-gray-300">last message at.. { message[message.length -1]?.timestamp.seconds||' '}</p> 
 			</div>
 			<div>
 				<Search className='text-black'/>
 				<Settings className='text-black'/>
 			</div>
 		</div>
-		<div className="flex flex-col">
-
-			<div className={`${true ?'bg-red-500 self-end ':'bg-gray-500 self-start'} text-white max-w-fit p-1 rounded-lg ml-2 mr-2 `}>
-				<h3 className="-mt-4 text-xs font-mono font-bold text-black" >User</h3>
-				<h1>Hello Bro</h1>
-				<h3 className="text-xs font-mono font-bold">~10:24PM</h3>
+		<div className="w-full h-full flex flex-col overflow-y-scroll bg-[url('https://img.freepik.com/free-vector/hand-drawn-doodle-icons-set_1308-90706.jpg?w=740&t=st=1707148625~exp=1707149225~hmac=c440157e62ff2026c425c36a4df58678a16c853093aa32b8a32574e77199561b')]"
+		>
+			{message && message.map((message) =>
+			<div key={message.timestamp} className={`${selector.displayName==message.username ?'bg-red-500 self-end ':'bg-gray-500 self-start'} mb-8 mt-8 text-white max-w-fit p-1 rounded-lg ml-2 mr-2 `}>
+				<div className="flex items-center text-xs max-w-fit rounded-xl font-mono font-bold text-white bg-black pr-2">
+				<Avatar   sx={{ width: 24, height: 24 }}/>
+				<h3 className="pl-2" >
+					{message.username}</h3>
+				</div>
+				<h1 className='text-xl text-mono'>{message.message}</h1>
+				<h3 className="text-xs font-mono font-bold">{message.timestamp.seconds}</h3>
 			</div>
+			)}
 		</div>
 		<div className='flex justify-between items-center bg-red-500 pl-4 h-12'>
 			<EmojiEmotions/>

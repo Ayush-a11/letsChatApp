@@ -12,6 +12,7 @@ const authSlice=createSlice({
 				state.user =action.payload;
 			}
 		}
+		
 	});
 
 const reducers =authSlice.reducer;

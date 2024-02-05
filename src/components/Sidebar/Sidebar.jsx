@@ -6,10 +6,11 @@ import Rooms from './Rooms';
 import db from '../../firebase'
 import { collection, getDocs,doc, addDoc  } from "firebase/firestore";
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 function Sidebar() {
 
 	const [rooms, setRooms] =useState([]);
-	
+	const selector= useSelector((state)=>state.user)
 	const getRoomsDetails =()=>{
 		
 		getDocs(collection(db, "Rooms")).then((querySnapshot) => {
@@ -38,7 +39,7 @@ function Sidebar() {
 			catch((error) => console.log(error))
 		}
 	},[]);
-
+	
 	console.log('rooms= ',rooms);
 	useEffect(()=>{	
 		console.log('useEffect called');
@@ -49,7 +50,7 @@ function Sidebar() {
 		<div className="flex items-center justify-between w-full bg-red-500 border-b-2 border-white h-12">
 		<div className="topIcons">
 		<IconButton>
-		<Avatar/>	
+		<Avatar src={selector.photoURL}/>	
 		</IconButton>
 		</div>
 		<div className="searchRoom">
@@ -65,15 +66,14 @@ function Sidebar() {
 		</IconButton>
 		</div>
 		</div>
-		<div onClick={handleSubmit} className='cursor-pointer w-full flex justify-center border-b-2 bg-white font-mono font-bold hover:bg-red-500 hover:text-white shadow-lg '>
-				<button onClick={handleSubmit}>Add Server</button>
+		<div onClick={handleSubmit} className='cursor-pointer w-full flex justify-center border-b-1 bg-white border-b-2 border-red-500 font-mono font-bold hover:bg-red-500 hover:text-white shadow-lg '>
+				<button  onClick={handleSubmit}>Add Server</button>
 			</div>
 		{rooms && rooms.map((item)=>
-		<Link to={`/Rooms/${item.id}`}>
+		
 			<div key={item.id}>
 			<Rooms id={item.id} name={item.name} image={item.image}/>
 			</div>
-		</Link>
 		)}
 		
 
