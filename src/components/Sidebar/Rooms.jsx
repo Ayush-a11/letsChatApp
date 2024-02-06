@@ -8,8 +8,8 @@ import db from '../../firebase';
 
 function Rooms({id,name,image}) {
 	const src= name.split('');
-	const [colors,setColors]= useState();
-	console.log('src',colors)
+	const [colors,setColors]= useState('red');
+	console.log('src',colors,'id',id)
 	const [lastMsg, setLastMsg] = useState();
 	useState(()=>{
 		const colors= ['red','blue','Violet','Pink','Orange','Yellow']
@@ -18,7 +18,7 @@ function Rooms({id,name,image}) {
 		console.log(index)
 		setColors(colors[index])
 	},[]);
-
+ 
 	useEffect(()=>{
 		if(id){
 			const q =query(collection(db,"Rooms",id,"Messages"),orderBy('timestamp','desc'),limit(1))
@@ -30,7 +30,7 @@ function Rooms({id,name,image}) {
 			).
 			catch((err)=>console.log('error',err))
 		}
-	},[])
+	},[]) 
 
   return (
 	<Link to={`/Rooms/${id}/${colors}`}>	

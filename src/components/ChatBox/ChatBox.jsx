@@ -1,8 +1,8 @@
-import { Collections, EmojiEmotions, Mic, Search, Send, Settings } from '@mui/icons-material'
+import { Collections, CopyAll, EmojiEmotions, Mic, Search, Send, Settings } from '@mui/icons-material'
 import { Avatar, Menu } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {useParams} from 'react-router-dom'
-import { addDoc, doc, getDoc } from "firebase/firestore";
+import { addDoc, doc, getDoc, where } from "firebase/firestore";
 import { collection, getDocs,orderBy,query,Timestamp 	  } from "firebase/firestore";
 
 import db from '../../firebase';
@@ -15,28 +15,24 @@ function ChatBox() {
 	const [message,setMessages] =useState([]);
 	const [roomInfo, setRoomInfo] = useState({});
 	const selector =useSelector((state)=>state.user);
+	const divRef = useRef(null);
 
-	console.log('ChatBox ',roomid,colors);
-	const addMessages =useCallback(() => {
-		setMessages([])
-		if(roomid){
-        console.log('hi')
-		const q= query(collection(db,"Rooms",roomid,"Messages"),orderBy("timestamp","asc"));
-			getDocs(q).
-			then((doc) =>(
-				doc.forEach((doc) =>
-				setMessages((prev)=> [...prev,doc.data()])
-				)
-			)).catch((error)=>console.log('error', error))
-		console.log('data-in',message)
-		}
-	},[roomid])	
 
+	console.log(roomid,colors);
+	console.log('message',message);
 	useEffect(() => {
 		setMessages([])
-		addMessages()
-	  },
-	  [roomid])
+		if(roomid){
+			const q= query(collection(db,"Rooms",roomid,"Messages"),orderBy("timestamp","asc"));
+				getDocs(q).
+				then((doc) =>(
+					doc.forEach((doc) =>
+					setMessages((prev)=> [...prev,doc.data()])
+					)
+				)).catch((error)=>console.log('error', error))
+			}
+	  },[roomid])
+
 	const handleSubmit =(e) => {
 		e.preventDefault();
         
@@ -44,19 +40,23 @@ function ChatBox() {
 			message: textmsg,
 			username: selector.displayName,
 			timestamp: Timestamp.fromDate(new Date())
-		}).then((id)=>console.log('doc ref id-> ',id)).
-		catch(error=> console.log('error',error));
-
+		}).then((id)=> 
+					getDoc(doc(db,"Rooms",roomid,"Messages",id.id))
+					.then((res)=>setMessages((prev)=>[...prev,res.data()])))
+					.catch(error=> console.log('error',error));
+		
 		setTextMsg('')
-		addMessages();
 	}
-	console.log('data',message)
 
-
+	useEffect(() => {
+		if (divRef.current) {
+		console.log(divRef)
+		  divRef.current.scrollTop = divRef.current.scrollHeight;
+		}
+	  }, [message]);
 
 	useEffect(() => {
 		if (roomid){
-
 			const docRef = doc(db,'Rooms',roomid)
 			getDoc(docRef).then((doc) =>
 			setRoomInfo(doc.data())
@@ -79,17 +79,25 @@ function ChatBox() {
 			<div>
 				<Search className='text-black'/>
 				<Settings className='text-black'/>
-			</div>
+			</div> 
 		</div>
-		<div className="w-full h-full flex flex-col overflow-y-scroll bg-[url('https://img.freepik.com/free-vector/hand-drawn-doodle-icons-set_1308-90706.jpg?w=740&t=st=1707148625~exp=1707149225~hmac=c440157e62ff2026c425c36a4df58678a16c853093aa32b8a32574e77199561b')]"
-		>
+		<div ref={divRef} className="w-full h-full flex flex-col overflow-y-scroll bg-[url('https://img.freepik.com/free-vector/hand-drawn-doodle-icons-set_1308-90706.jpg?w=740&t=st=1707148625~exp=1707149225~hmac=c440157e62ff2026c425c36a4df58678a16c853093aa32b8a32574e77199561b')]"
+		>	
 			{message && message.map((message) =>
-			<div key={message.timestamp} className={`${selector.displayName==message.username ?'bg-red-500 self-end ':'bg-gray-500 self-start'} mb-8 mt-8 text-white max-w-fit p-1 rounded-lg ml-2 mr-2 `}>
+			<div  key={message.message} className={`${selector.displayName==message.username ?'bg-red-500 self-end ml-40 ':'bg-gray-500 self-start ml-40'}  mb-8 mt-8 text-white max-w-fit p-1 rounded-lg ml-2 mr-2 `}>
+				<div className="flex items-center justify-between text-xs w-full rounded-xl font-mono font-bold text-white pr-2">
 				<div className="flex items-center text-xs max-w-fit rounded-xl font-mono font-bold text-white bg-black pr-2">
 				<Avatar   sx={{ width: 24, height: 24 }}/>
 				<h3 className="pl-2" >
 					{message.username}</h3>
 				</div>
+				<div className='flex pr-2 max-w-fit rounded-lg font-mono font-bold text-white bg-black ml-2'>
+					<button title="Copy" className=" pl-2 hover:scale-110 transition-transform duration-300"
+						onClick={(e)=>window.navigator.clipboard.writeText(message.message)}
+					><CopyAll/></button>
+				</div>
+				</div>
+				
 				<h1 className='text-xl text-mono'>{message.message}</h1>
 				<h3 className="text-xs font-mono font-bold">{message.timestamp.seconds}</h3>
 			</div>

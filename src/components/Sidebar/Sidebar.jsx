@@ -4,37 +4,25 @@ import './Sidebar.css'
 import { Avatar, IconButton } from '@mui/material';
 import Rooms from './Rooms';
 import db from '../../firebase'
-import { collection, getDocs,doc, addDoc  } from "firebase/firestore";
+import { collection, getDocs,doc, addDoc, getDoc  } from "firebase/firestore";
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 function Sidebar() {
 
 	const [rooms, setRooms] =useState([]);
 	const selector= useSelector((state)=>state.user)
-	const getRoomsDetails =()=>{
-		
-		getDocs(collection(db, "Rooms")).then((querySnapshot) => {
-			querySnapshot.forEach((doc) => {
-			  const newRoom = {
-				id: doc.id,
-				name: doc.data().name,
-				image: doc.data().image
-			  };
-		  
-			  // Check if the room with the same id already exists in state
-			  if (!rooms.some(room => room.id === newRoom.id)) {
-				setRooms((prev) => [...prev, newRoom]);
-			  }
-			});
-		  });
-	}
+	
+
+
 	const handleSubmit= useCallback(() => {
 	const newRoom= prompt("Enter server Name");
 
 		if(newRoom){
 			addDoc(collection(db, "Rooms"),{name:newRoom, images:''}).
 			then((response) =>(
-				getRoomsDetails()
+				getDoc(doc(db,"Rooms",response.id))
+					.then((res)=>setRooms((prev)=>[...prev,{id:res.id,...res.data()}])))
+					.catch(error=> console.log('error',error)
 			)).
 			catch((error) => console.log(error))
 		}
@@ -42,8 +30,14 @@ function Sidebar() {
 	
 	console.log('rooms= ',rooms);
 	useEffect(()=>{	
+		setRooms([])
 		console.log('useEffect called');
-		getRoomsDetails();
+		getDocs(collection(db, "Rooms")).then((querySnapshot) => {
+			querySnapshot.forEach((doc) => 
+			  
+				setRooms((prev) => [...prev,{id: doc.id,...doc.data()}]))
+			
+			});
 	},[])
   return (
 	<div className="flex flex-col">
