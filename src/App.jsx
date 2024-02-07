@@ -5,13 +5,14 @@ import { useEffect, useState } from "react"
 import { Label } from "@mui/icons-material";
 import { Avatar } from "@mui/material";
 
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Login from "./components/Login";
 import { useSelector } from "react-redux";
 function App() {
   const [room, setRoom] =useState();
   const selector= useSelector((state)=>(state.user))
   const [user, setUser] =useState();
+  const navigate =useNavigate();
   console.log('user',user);
   useEffect(()=>{
     setUser(selector)
@@ -43,8 +44,10 @@ function App() {
           <Outlet/>
         </div>
         </>
-        :<Login/>}
-       
+        
+        :<> {navigate('/')}<Login/>
+        </>
+        }
       </div>
     </>
   )
