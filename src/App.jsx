@@ -20,7 +20,7 @@ function App() {
   return (
     <>
       <div className="  flex  w-full h-screen shadow-xl">
-        {user? 
+        {selector? 
         <>
         <div className="sidebar ">
         <Sidebar/>
@@ -45,7 +45,7 @@ function App() {
         </div>
         </>
         
-        :<> {navigate('/')}<Login/>
+        :<> <Login/>
         </>
         }
       </div>
