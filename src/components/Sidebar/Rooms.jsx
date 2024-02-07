@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Avatar, IconButton } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, limit, onSnapshot, orderBy, query } from 'firebase/firestore';
 import db from '../../firebase';
 
 
@@ -22,16 +22,18 @@ function Rooms({id,name,image}) {
 	useEffect(()=>{
 		if(id){
 			const q =query(collection(db,"Rooms",id,"Messages"),orderBy('timestamp','desc'),limit(1))
-			getDocs(q).
-			then((item)=>
-				item.forEach((msg)=>
-				setLastMsg(msg.data().message)
-				)
-			).
-			catch((err)=>console.log('error',err))
+			const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                const updatedMessages =[];
+                querySnapshot.forEach((doc) => {
+                    updatedMessages.push(doc.data().message);
+                });
+                setLastMsg(updatedMessages[0]);
+            });
+            return unsubscribe;
 		}
 	},[]) 
 
+	console.log(lastMsg)
   return (
 	<Link to={`/Rooms/${id}/${colors}`}>	
 	<div className="servers">

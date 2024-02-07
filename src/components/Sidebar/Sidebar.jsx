@@ -11,8 +11,12 @@ function Sidebar() {
 
 	const [rooms, setRooms] =useState([]);
 	const selector= useSelector((state)=>state.user)
-	
+	const [searchServer,setSearchServer] =useState();
 
+	const filterHandler=(e)=>{
+
+		setRooms(rooms.filter((item)=>(e.target.value.match(item.name)))) 
+	}
 
 	const handleSubmit= useCallback(() => {
 	const newRoom= prompt("Enter server Name");
@@ -49,7 +53,8 @@ function Sidebar() {
 		</div>
 		<div className="searchRoom">
 		<IconButton><Search className='text-black'/></IconButton>
-			<input className="w-full rounded-xl pl-4 border-none border-white " type="text" placeholder="Search Your Server"/>
+			<input className="w-full rounded-xl pl-4 border-none border-white " type="text" placeholder="Search Your Server"
+			value={searchServer} onChange={(e) =>filterHandler(e)}/>
 		</div>
 		<div className="pr-4">
 		<IconButton>	
