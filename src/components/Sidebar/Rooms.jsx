@@ -42,7 +42,7 @@ function Rooms({id,name,image}) {
 				<h1 className='text-2xls'>{name}</h1>
 				<div className='flex'>
 				<p className='text-sm'><b>last message..</b></p>
-				<p className='text-gray-500'> {lastMsg}	</p>
+				<p className='text-gray-500'> {lastMsg?.substring(0, 20)}..	</p>
 				</div>
 				</div>
 			</div>

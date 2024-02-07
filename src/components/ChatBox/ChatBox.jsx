@@ -91,7 +91,7 @@ function ChatBox() {
 				<h3 className="pl-2" >
 					{message.username}</h3>
 				</div>
-				<div className='flex pr-2 max-w-fit rounded-lg font-mono font-bold text-white bg-black ml-2'>
+				<div className='flex pr-2	 max-w-fit rounded-lg font-mono font-bold text-white bg-black ml-2'>
 					<button title="Copy" className=" pl-2 hover:scale-110 transition-transform duration-300"
 						onClick={(e)=>window.navigator.clipboard.writeText(message.message)}
 					><CopyAll/></button>
